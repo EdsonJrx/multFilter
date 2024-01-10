@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SectionedMultiSelect from "react-native-sectioned-multi-select";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Item {
   name: string;
@@ -16,14 +17,31 @@ interface SelectedItem {
 
 type MultFilterProps = {
   items: Item[];
+  handleFilter:()=>void;
 };
 
-export default function MultFilter({ items }: MultFilterProps) {
+export default function MultFilter({ items, handleFilter }: MultFilterProps) {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('newSelectedItems').then((value) => {
+        if (value !== null) {
+          const newSelectedItems = JSON.parse(value);
+          setSelectedItems(newSelectedItems);
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  const onSelectedItemsChange = (selectedIds: number[]) => {
+  useEffect(() => {
+    retrieveData();
+  }, []);
+
+  const onSelectedItemsChange = async (selectedIds: number[]) => {
     const newSelectedItems = items
-      .flatMap((item) => item.children || []) // transforma a lista de itens em uma lista de filhos
+      .flatMap((item) => item.children || [])
       .filter((child) => {
         const isChildSelected = selectedIds.includes(child.id);
         return isChildSelected;
@@ -33,9 +51,13 @@ export default function MultFilter({ items }: MultFilterProps) {
         name: child.name,
         parentName: items.find((item) => item.children?.includes(child))?.name,
       }));
-
-    setSelectedItems(newSelectedItems);
-    console.log("New selected items:", newSelectedItems);
+      setSelectedItems(newSelectedItems);
+    try {
+      await AsyncStorage.setItem('newSelectedItems', JSON.stringify(newSelectedItems)).then(() => handleFilter());
+    } catch (error) {
+      console.error(error);
+    }
+    
   };
 
   return (

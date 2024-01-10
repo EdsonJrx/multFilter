@@ -8,8 +8,7 @@ interface SelectedItem {
 
 export const selectedItems: SelectedItem[] = [
   { id: 3, name: "2.0374", parentName: "CODCCUSTO" },
-  { id: 8, name: "cleverton.lima", parentName: "USUARIOCRIACAO" },
-  { id: 9, name: "pedro.souza", parentName: "USUARIOCRIACAO" },
+  { id: 8, name: "thales.oliveira", parentName: "USUARIOCRIACAO" },
 ];
 
 
